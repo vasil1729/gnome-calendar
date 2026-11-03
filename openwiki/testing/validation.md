@@ -47,6 +47,18 @@ libedataserver/libecal/GTK stack. The test created the registry, created an
 `ECredentialsPrompter`, listed sources, connected to each calendar source, and
 queried its object list.
 
+### Persistence and time zones
+
+- Events created in the app are written to
+  `%LOCALAPPDATA%\evolution\calendar\system\calendar.ics` and survive an app
+  restart.
+- A timed event created at 08:00 in the local `India Standard Time` zone was
+  stored as `02:30Z` and displayed at 08:00 after a restart. The UTC conversion
+  is required because libical does not know the Windows timezone name.
+- The source's `Selected` flag persists in the EDS `.source` file. A calendar
+  that is unchecked in the sidebar is not displayed, even though its events are
+  still stored.
+
 ### Bundle portability
 
 - The bundle runs with the MSYS2 installation temporarily renamed. This confirms

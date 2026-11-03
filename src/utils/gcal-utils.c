@@ -421,6 +421,10 @@ build_component_from_details (const gchar *summary,
   ICalTimezone *tz = NULL;
   ICalTime *itt = NULL;
   gboolean all_day = FALSE;
+  gboolean convert_to_utc = FALSE;
+  g_autoptr (GDateTime) end_date = NULL;
+  g_autoptr (GDateTime) start_utc = NULL;
+  g_autoptr (GDateTime) end_utc = NULL;
 
   event = e_cal_component_new ();
   e_cal_component_set_new_vtype (event, E_CAL_COMPONENT_EVENT);
@@ -435,6 +439,11 @@ build_component_from_details (const gchar *summary,
    * When the event is all day, we consider UTC timezone by default. Otherwise,
    * we always use the system timezone to create new events
    */
+  if (final_date)
+    end_date = g_date_time_ref (final_date);
+  else
+    end_date = g_date_time_add_days (initial_date, 1);
+
   if (all_day)
     {
       tz = i_cal_timezone_get_utc_timezone ();
@@ -443,11 +452,22 @@ build_component_from_details (const gchar *summary,
     {
       g_autoptr (GTimeZone) zone = NULL;
       zone = gcal_util_get_app_timezone_or_local ();
-      tz = gcal_timezone_to_icaltimezone (zone);
+      tz = i_cal_timezone_get_builtin_timezone (g_time_zone_get_identifier (zone));
+
+      if (!tz)
+        {
+          /* Windows timezone names are not in libical's builtin IANA
+           * database. Convert the wall time to UTC so the event is not
+           * shifted by the local offset. */
+          tz = i_cal_timezone_get_utc_timezone ();
+          convert_to_utc = TRUE;
+          start_utc = g_date_time_to_utc (initial_date);
+          end_utc = g_date_time_to_utc (end_date);
+        }
     }
 
   /* Start date */
-  itt = gcal_date_time_to_icaltime (initial_date);
+  itt = gcal_date_time_to_icaltime (convert_to_utc ? start_utc : initial_date);
   i_cal_time_set_timezone (itt, tz);
   i_cal_time_set_is_date (itt, all_day);
   dt = e_cal_component_datetime_new_take (itt, tz ? g_strdup (i_cal_timezone_get_tzid (tz)) : NULL);
@@ -456,10 +476,7 @@ build_component_from_details (const gchar *summary,
   e_cal_component_datetime_free (dt);
 
   /* End date */
-  if (!final_date)
-    final_date = g_date_time_add_days (initial_date, 1);
-
-  itt = gcal_date_time_to_icaltime (final_date);
+  itt = gcal_date_time_to_icaltime (convert_to_utc ? end_utc : end_date);
   i_cal_time_set_timezone (itt, tz);
   i_cal_time_set_is_date (itt, all_day);
   dt = e_cal_component_datetime_new_take (itt, tz ? g_strdup (i_cal_timezone_get_tzid (tz)) : NULL);

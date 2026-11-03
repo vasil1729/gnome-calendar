@@ -226,10 +226,9 @@ build_component_from_datetime (GcalEvent *self,
   if (!dt)
     return NULL;
 
-  itt = gcal_date_time_to_icaltime (dt);
-
   if (self->all_day)
     {
+      itt = gcal_date_time_to_icaltime (dt);
       i_cal_time_set_timezone (itt, i_cal_timezone_get_utc_timezone ());
       tzid = g_strdup ("UTC");
     }
@@ -237,11 +236,30 @@ build_component_from_datetime (GcalEvent *self,
     {
       ICalTimezone *tz;
       GTimeZone *zone;
+      const gchar *zone_id;
 
       zone = g_date_time_get_timezone (dt);
-      tz = gcal_timezone_to_icaltimezone (zone);
-      i_cal_time_set_timezone (itt, tz);
-      tzid = g_strdup (i_cal_timezone_get_tzid (tz));
+      zone_id = g_time_zone_get_identifier (zone);
+      tz = i_cal_timezone_get_builtin_timezone (zone_id);
+
+      if (tz)
+        {
+          itt = gcal_date_time_to_icaltime (dt);
+          i_cal_time_set_timezone (itt, tz);
+          tzid = g_strdup (i_cal_timezone_get_tzid (tz));
+        }
+      else
+        {
+          /* Windows uses timezone names such as "India Standard Time",
+           * which are not part of libical's built-in IANA database. Store
+           * the event in UTC instead of treating the local wall time as
+           * UTC, otherwise the event is shifted by the local offset. */
+          g_autoptr (GDateTime) utc_dt = g_date_time_to_utc (dt);
+
+          itt = gcal_date_time_to_icaltime (utc_dt);
+          i_cal_time_set_timezone (itt, i_cal_timezone_get_utc_timezone ());
+          tzid = g_strdup ("UTC");
+        }
     }
 
   /* Call it after setting the timezone, because the DATE values do not let set the timezone */

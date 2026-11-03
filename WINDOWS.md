@@ -96,6 +96,11 @@ The branch contains small, targeted Windows fixes:
   `GcalDateChooserRow` and `GcalDateSelector` with `g_type_ensure()`. On Windows
   the static-library link can drop objects whose types are referenced only from
   GtkBuilder templates.
+- `src/core/gcal-event.c`, `src/utils/gcal-utils.c`: when the local timezone is
+  a Windows name that libical does not recognize (for example
+  `India Standard Time`), convert new timed events to UTC before storing them.
+  Without this, the local wall time was treated as UTC and events appeared
+  shifted by the local offset.
 - `src/gui/common/*.c`, `src/gui/event-editor/*.c`: guard the remaining
   `langinfo.h` includes.
 
