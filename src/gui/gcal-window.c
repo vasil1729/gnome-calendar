@@ -1194,6 +1194,12 @@ restore_normal_geometry_cb (gpointer user_data)
       RECT window_rect;
       POINT cursor;
 
+      /* A drag-to-restore keeps the pointer captured while the user moves
+       * the restored window. Do not override the position chosen by that
+       * drag. */
+      if (GetCapture () != NULL || (GetAsyncKeyState (VK_LBUTTON) & 0x8000) != 0)
+        return G_SOURCE_REMOVE;
+
       SetWindowPos (hwnd, NULL,
                     self->normal_geometry.x,
                     self->normal_geometry.y,
@@ -1230,7 +1236,7 @@ on_window_state_changed_cb (GObject    *object,
     {
       if (self->geometry_restore_id != 0)
         g_source_remove (self->geometry_restore_id);
-      self->geometry_restore_id = g_timeout_add (50, restore_normal_geometry_cb, self);
+      self->geometry_restore_id = g_timeout_add (100, restore_normal_geometry_cb, self);
     }
 }
 #endif

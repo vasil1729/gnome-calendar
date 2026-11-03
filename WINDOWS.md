@@ -109,7 +109,9 @@ The branch contains small, targeted Windows fixes:
   restore is skipped for minimized windows, and the Windows build always starts
   windowed because a saved maximized state leaves no pre-maximize geometry to
   restore. If the pointer would be left outside the restored window, it is moved
-  back over the restored window's header bar.
+  back over the restored window's header bar. Drag-to-restore is left to
+  GTK/Windows: when the mouse is captured or the left button is held, the
+  geometry override is skipped so the window follows the drag.
 - `src/gui/common/*.c`, `src/gui/event-editor/*.c`: guard the remaining
   `langinfo.h` includes.
 

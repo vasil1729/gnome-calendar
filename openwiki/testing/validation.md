@@ -40,6 +40,8 @@ specific so a future contributor can distinguish "it built" from "it works".
 - The pointer was placed at the maximized window's restore button; after
   restore it was moved back inside the restored window instead of being left
   far outside.
+- Drag-to-restore from the header bar was validated: the restored window
+  followed the drag position and the pointer ended inside it.
 
 ### Evolution Data Server
 
