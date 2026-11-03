@@ -104,18 +104,17 @@ The branch contains small, targeted Windows fixes:
   Without this, the local wall time was treated as UTC and events appeared
   shifted by the local offset.
 - `src/gui/gcal-window.c`: remember the normal window rectangle while the window
-  is unmaximized and restore it after unmaximizing. GTK's Win32 backend
-  otherwise lets the window creep to a new position on maximize/restore. The
-  restore is skipped for minimized windows, and the Windows build always starts
-  windowed because a saved maximized state leaves no pre-maximize geometry to
-  restore. If the pointer would be left outside the restored window, it is moved
-  back over the restored window's header bar. Drag-to-restore is left to
-  GTK/Windows: when the mouse is captured or the left button is held, the
-  geometry override is skipped so the window follows the drag. If the pointer
-  is outside the restored window when the drag begins (for example when
-  grabbing the right side of the header), the window is centered on the pointer
-  immediately, while the drag is still active, so it follows the drag directly
-  instead of jumping after release.
+  is unmaximized and restore it for button/double-click restores. GTK's Win32
+  backend otherwise lets the window creep to a new position on
+  maximize/restore. The restore is skipped for minimized windows, and the
+  Windows build always starts windowed because a saved maximized state leaves
+  no pre-maximize geometry to restore. If the pointer would be left outside the
+  restored window, it is moved back over the restored window's header bar.
+  Drag-to-restore uses the native grab-point behavior: the header point you
+  grabbed stays under the pointer and the window follows the drag from the
+  first movement. Grabbing very close to the right edge can put the restored
+  window partly off-screen left because the grab point is beyond the restored
+  window's width.
 - `src/gui/common/*.c`, `src/gui/event-editor/*.c`: guard the remaining
   `langinfo.h` includes.
 

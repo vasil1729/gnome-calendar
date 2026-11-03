@@ -40,15 +40,14 @@ specific so a future contributor can distinguish "it built" from "it works".
 - The pointer was placed at the maximized window's restore button; after
   restore it was moved back inside the restored window instead of being left
   far outside.
-- Drag-to-restore from the header bar was validated: the restored window
-  followed the drag position and the pointer ended inside it.
-- Right-header drag was validated: dragging from `(1300,20)` to `(1000,300)`
-  restored the window centered at `(616,280)-(1384,930)`, with the pointer
-  `(1000,300)` inside it instead of the window being pushed off-screen left.
-- Left-header drag sampling confirmed direct tracking: the window followed the
-  pointer at every sample (for example `(150,190)-(918,840)` with pointer
-  `(350,210)` mid-drag), and ended at `(300,380)-(1068,1030)` with pointer
-  `(500,400)` after release. There was no late left-then-right jump.
+- Drag-to-restore uses the native grab-point behavior. A left-header drag from
+  `(200,20)` to `(500,400)` kept the grabbed header point under the pointer at
+  every sample (window left = pointer.x - 200) and ended at
+  `(300,380)-(1068,1030)` with the pointer at `(500,400)`. There was no late
+  left-then-right jump.
+- Grabbing very close to the right edge can put the restored window partly
+  off-screen left, because the grabbed header point is beyond the restored
+  window's width. That is the trade-off of preserving the grab point.
 
 ### Evolution Data Server
 

@@ -169,9 +169,6 @@ struct _GcalWindow
   gboolean            normal_geometry_valid;
   guint               geometry_update_id;
   guint               geometry_restore_id;
-  guint               drag_restore_correction_id;
-  gint                drag_restore_attempts;
-  gboolean            drag_restore_pending;
 #endif
 
   /* File drop */
@@ -1157,91 +1154,12 @@ gcal_window_get_hwnd (GcalWindow *self)
   return surface ? gdk_win32_surface_get_handle (surface) : NULL;
 }
 
-static void
-center_window_on_pointer (HWND hwnd)
-{
-  RECT current_rect;
-  POINT cursor;
-  gint width, height, new_x, new_y;
-  MONITORINFO monitor_info;
-  HMONITOR monitor;
-
-  if (!GetWindowRect (hwnd, &current_rect) || !GetCursorPos (&cursor))
-    return;
-
-  if (PtInRect (&current_rect, cursor))
-    return;
-
-  width = current_rect.right - current_rect.left;
-  height = current_rect.bottom - current_rect.top;
-  new_x = cursor.x - width / 2;
-  new_y = cursor.y - 20;
-
-  monitor = MonitorFromPoint (cursor, MONITOR_DEFAULTTONEAREST);
-  monitor_info.cbSize = sizeof (monitor_info);
-  if (GetMonitorInfo (monitor, &monitor_info))
-    {
-      new_x = CLAMP (new_x, monitor_info.rcWork.left, monitor_info.rcWork.right - width);
-      new_y = CLAMP (new_y, monitor_info.rcWork.top, monitor_info.rcWork.bottom - height);
-    }
-
-  SetWindowPos (hwnd, NULL, new_x, new_y, width, height,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-}
-
-static gboolean
-correct_drag_restore_cb (gpointer user_data)
-{
-  GcalWindow *self = GCAL_WINDOW (user_data);
-  HWND hwnd = gcal_window_get_hwnd (self);
-  RECT current_rect;
-  POINT cursor;
-
-  self->drag_restore_correction_id = 0;
-
-  if (!hwnd || IsIconic (hwnd) ||
-      gtk_window_is_maximized (GTK_WINDOW (self)) ||
-      gtk_window_is_fullscreen (GTK_WINDOW (self)))
-    return G_SOURCE_REMOVE;
-
-  if (GetWindowRect (hwnd, &current_rect) && GetCursorPos (&cursor))
-    {
-      if (!PtInRect (&current_rect, cursor))
-        {
-          center_window_on_pointer (hwnd);
-          return G_SOURCE_REMOVE;
-        }
-
-      /* The window may not have been positioned yet. Retry briefly. */
-      if (self->drag_restore_pending && self->drag_restore_attempts < 5)
-        {
-          self->drag_restore_attempts++;
-          self->drag_restore_correction_id = g_timeout_add (10, correct_drag_restore_cb, self);
-        }
-    }
-
-  return G_SOURCE_REMOVE;
-}
-
 static gboolean
 update_normal_geometry_cb (gpointer user_data)
 {
   GcalWindow *self = GCAL_WINDOW (user_data);
   HWND hwnd = gcal_window_get_hwnd (self);
   RECT rect;
-
-  if (self->drag_restore_pending)
-    {
-      if (GetCapture () != NULL || (GetAsyncKeyState (VK_LBUTTON) & 0x8000) != 0)
-        return G_SOURCE_CONTINUE;
-
-      if (hwnd && !IsIconic (hwnd) &&
-          !gtk_window_is_maximized (GTK_WINDOW (self)) &&
-          !gtk_window_is_fullscreen (GTK_WINDOW (self)))
-        center_window_on_pointer (hwnd);
-
-      self->drag_restore_pending = FALSE;
-    }
 
   /* Do not capture transient geometry while the user is dragging or
    * resizing the window. */
@@ -1331,14 +1249,7 @@ on_window_state_changed_cb (GObject    *object,
    * captured while the user moves the window. Do not schedule the saved
    * geometry override in that case. */
   if (GetCapture () != NULL || (GetAsyncKeyState (VK_LBUTTON) & 0x8000) != 0)
-    {
-      self->drag_restore_pending = TRUE;
-      self->drag_restore_attempts = 0;
-      if (self->drag_restore_correction_id != 0)
-        g_source_remove (self->drag_restore_correction_id);
-      self->drag_restore_correction_id = g_timeout_add (10, correct_drag_restore_cb, self);
-      return;
-    }
+    return;
 
   if (self->normal_geometry_valid)
     {
@@ -1370,11 +1281,6 @@ gcal_window_finalize (GObject *object)
     {
       g_source_remove (window->geometry_restore_id);
       window->geometry_restore_id = 0;
-    }
-  if (window->drag_restore_correction_id != 0)
-    {
-      g_source_remove (window->drag_restore_correction_id);
-      window->drag_restore_correction_id = 0;
     }
 #endif
 
