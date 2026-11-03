@@ -22,7 +22,9 @@
 #include "gcal-calendar-row.h"
 
 #include <locale.h>
+#ifndef G_OS_WIN32
 #include <langinfo.h>
+#endif
 #include <stdlib.h>
 #include <glib/gi18n.h>
 

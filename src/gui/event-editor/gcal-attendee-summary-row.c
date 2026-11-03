@@ -137,7 +137,7 @@ setup_filtered_attendees (GcalAttendeeSummaryRow *self,
     return;
 
   guint n = g_list_model_get_n_items (attendees);
-  for (uint i = 0; i < n; ++i)
+  for (guint i = 0; i < n; ++i)
     {
       GcalEventAttendee *attendee = g_list_model_get_item (attendees, i);
       g_list_store_append (self->attendees, attendee);

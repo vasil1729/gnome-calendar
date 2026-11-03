@@ -93,9 +93,11 @@ gcal_log_init (void)
 
   if (g_once_init_enter (&initialized))
     {
+#ifndef G_OS_WIN32
       standard_channel = g_io_channel_unix_new (STDOUT_FILENO);
 
       g_log_set_default_handler (gcal_log_handler, NULL);
+#endif
 
       g_once_init_leave (&initialized, TRUE);
     }

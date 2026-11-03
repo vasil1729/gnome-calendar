@@ -1,0 +1,10 @@
+prefix=@PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/libgeoclue-2.0
+
+Name: libgeoclue
+Description: Minimal GeoClue stub for the native Windows GNOME Calendar port
+Version: 2.7.0
+Libs: -L${libdir} -lgeoclue-2.0
+Cflags: -I${includedir}

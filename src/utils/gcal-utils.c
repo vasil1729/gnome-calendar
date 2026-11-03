@@ -36,8 +36,11 @@
 
 #include <glib/gi18n.h>
 
+#ifndef G_OS_WIN32
 #include <langinfo.h>
+#endif
 #include <locale.h>
+#include <time.h>
 
 #include <string.h>
 #include <math.h>
@@ -48,59 +51,6 @@
  * @short_description: Utility functions
  * @title:Utility functions
  */
-
-static const gint
-ab_day[N_WEEKDAYS] =
-{
-  ABDAY_1,
-  ABDAY_2,
-  ABDAY_3,
-  ABDAY_4,
-  ABDAY_5,
-  ABDAY_6,
-  ABDAY_7,
-};
-
-static const gint
-month_item[12] =
-{
-  /* ALTMON_* constants have been introduced in glibc 2.27 (Feb 1, 2018), also
-   * have been supported in *BSD family (but not in OS X) since 1990s.
-   * If they exist they are the correct way to obtain the month names in
-   * nominative case, standalone, without the day number, as used in the
-   * calendar header.  This is obligatory in some languages (Slavic, Baltic,
-   * Greek, etc.) but also recommended to use in all languages because for
-   * other languages there is no difference between ALTMON_* and MON_*.
-   * If ALTMON_* is not supported then we must use MON_*.
-   */
-#ifdef HAVE_ALTMON
-  ALTMON_1,
-  ALTMON_2,
-  ALTMON_3,
-  ALTMON_4,
-  ALTMON_5,
-  ALTMON_6,
-  ALTMON_7,
-  ALTMON_8,
-  ALTMON_9,
-  ALTMON_10,
-  ALTMON_11,
-  ALTMON_12
-#else
-  MON_1,
-  MON_2,
-  MON_3,
-  MON_4,
-  MON_5,
-  MON_6,
-  MON_7,
-  MON_8,
-  MON_9,
-  MON_10,
-  MON_11,
-  MON_12
-#endif
-};
 
 #define SCROLL_HARDNESS 10.0
 
@@ -115,7 +65,17 @@ month_item[12] =
 gchar*
 gcal_get_weekday (gint i)
 {
-  return nl_langinfo (ab_day[i]);
+  static gchar buf[64];
+  struct tm tm = { 0 };
+
+  tm.tm_year = 121;
+  tm.tm_mon = 0;
+  tm.tm_mday = 3 + i;
+
+  if (strftime (buf, sizeof buf, "%a", &tm) == 0)
+    buf[0] = '\0';
+
+  return buf;
 }
 
 /**
@@ -129,7 +89,17 @@ gcal_get_weekday (gint i)
 gchar*
 gcal_get_month_name (gint i)
 {
-  return nl_langinfo (month_item[i]);
+  static gchar buf[64];
+  struct tm tm = { 0 };
+
+  tm.tm_year = 121;
+  tm.tm_mon = i;
+  tm.tm_mday = 1;
+
+  if (strftime (buf, sizeof buf, "%B", &tm) == 0)
+    buf[0] = '\0';
+
+  return buf;
 }
 
 /**
@@ -1245,24 +1215,11 @@ gcal_utils_ask_recurrence_modification_type (GtkWidget                 *parent,
 const gchar *
 gcal_util_translate_time_string (const gchar *str)
 {
-  const gchar *locale = g_getenv ("LC_TIME");
   const gchar *res;
   gchar *sep;
-  locale_t old_loc;
-  locale_t loc = (locale_t) 0;
-
-  if (locale)
-    loc = newlocale (LC_MESSAGES_MASK, locale, (locale_t) 0);
-
-  old_loc = uselocale (loc);
 
   sep = strchr (str, '\004');
   res = g_dpgettext (NULL, str, sep ? sep - str + 1 : 0);
-
-  uselocale (old_loc);
-
-  if (loc != (locale_t) 0)
-    freelocale (loc);
 
   return res;
 }

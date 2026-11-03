@@ -29,7 +29,9 @@
 #include "gcal-view.h"
 
 #include <glib/gi18n.h>
+#ifndef G_OS_WIN32
 #include <langinfo.h>
+#endif
 #include <locale.h>
 #include <stdlib.h>
 
@@ -312,15 +314,7 @@ calendar_compute_days (GcalDateChooser *self)
 static const char *
 calendar_get_weekday_name (gint i)
 {
-  const char *locale = g_getenv ("LC_TIME");
   const char *res;
-  locale_t old_loc;
-  locale_t loc = (locale_t) 0;
-
-  if (locale)
-    loc = newlocale (LC_MESSAGES_MASK, locale, (locale_t) 0);
-
-  old_loc = uselocale (loc);
 
   switch (i)
     {
@@ -369,11 +363,6 @@ calendar_get_weekday_name (gint i)
     default:
       g_assert_not_reached ();
     }
-
-  uselocale (old_loc);
-
-  if (loc != (locale_t) 0)
-    freelocale (loc);
 
   return res;
 }

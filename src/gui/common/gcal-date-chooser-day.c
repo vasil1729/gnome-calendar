@@ -26,7 +26,9 @@
 #include "gcal-utils.h"
 
 #include <stdlib.h>
+#ifndef G_OS_WIN32
 #include <langinfo.h>
+#endif
 
 struct _GcalDateChooserDay
 {

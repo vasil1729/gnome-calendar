@@ -12,6 +12,30 @@
 
 [![Flatpak](https://flathub.org/api/badge?svg&locale=en)](https://flathub.org/apps/details/org.gnome.Calendar)
 
+## Windows native build
+
+This branch (`windows-native-port`) adds a native Windows port of GNOME
+Calendar 50.0. It runs as a normal Win32 application with GTK4's Windows
+backend, libadwaita, Evolution Data Server, and a private D-Bus session. It does
+not use WSL.
+
+- Full build and packaging guide: [WINDOWS.md](WINDOWS.md)
+- OpenWiki architecture and build documentation: [openwiki/quickstart.md](openwiki/quickstart.md)
+- Windows branch: <https://github.com/vasil1729/gnome-calendar/tree/windows-native-port>
+- Evolution Data Server branch: <https://github.com/vasil1729/evolution-data-server/tree/windows-native-port>
+
+Quick start from an MSYS2 UCRT64 shell:
+
+```bash
+bash windows/setup-msys2.sh
+bash windows/build-eds.sh
+bash windows/build-gnome-calendar.sh
+bash windows/build-bundle.sh
+```
+
+The bundle is written to `C:\Users\<you>\GNOME-Calendar-Native` by default.
+Double-click `GNOME Calendar.exe` in that folder to start it.
+
 ## Links
 
 - Homepage: [apps.gnome.org/Calendar]

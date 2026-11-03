@@ -1,0 +1,10 @@
+prefix=@PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: uuid
+Description: Minimal libuuid shim for the native Windows GNOME Calendar port
+Version: 2.41
+Libs: -L${libdir} -luuid -lrpcrt4
+Cflags: -I${includedir}

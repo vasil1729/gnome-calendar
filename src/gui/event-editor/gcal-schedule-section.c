@@ -700,6 +700,8 @@ gcal_schedule_section_class_init (GcalScheduleSectionClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
+  g_type_ensure (GCAL_TYPE_DATE_CHOOSER_ROW);
+  g_type_ensure (GCAL_TYPE_DATE_SELECTOR);
   g_type_ensure (GCAL_TYPE_DATE_TIME_CHOOSER);
 
   object_class->finalize = gcal_schedule_section_finalize;
