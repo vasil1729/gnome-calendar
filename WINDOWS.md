@@ -55,6 +55,8 @@ GWeather location database. That is what `windows/build-bundle.sh` assembles.
   needed to build it.
 - No console window: the app is linked as a Windows GUI subsystem executable,
   and the launcher hides the service consoles.
+- Window maximize/restore keeps its position instead of drifting to a new
+  location.
 
 ## Known limitations
 
@@ -101,6 +103,10 @@ The branch contains small, targeted Windows fixes:
   `India Standard Time`), convert new timed events to UTC before storing them.
   Without this, the local wall time was treated as UTC and events appeared
   shifted by the local offset.
+- `src/gui/gcal-window.c`: remember the normal window rectangle while the window
+  is unmaximized and restore it after unmaximizing. GTK's Win32 backend
+  otherwise lets the window creep to a new position on maximize/restore. The
+  restore is skipped for minimized windows.
 - `src/gui/common/*.c`, `src/gui/event-editor/*.c`: guard the remaining
   `langinfo.h` includes.
 

@@ -47,6 +47,10 @@
 #include <glib/gi18n.h>
 #include <libecal/libecal.h>
 
+#ifdef G_OS_WIN32
+#include <gdk/win32/gdkwin32.h>
+#endif
+
 /**
  * SECTION:gcal-window
  * @short_description: Main window of GNOME Calendar
@@ -159,6 +163,13 @@ struct _GcalWindow
 
   /* Window states */
   gboolean            in_key_press;
+
+#ifdef G_OS_WIN32
+  GdkRectangle        normal_geometry;
+  gboolean            normal_geometry_valid;
+  guint               geometry_update_id;
+  guint               geometry_restore_id;
+#endif
 
   /* File drop */
   GcalDropOverlay    *drop_overlay;
@@ -1134,6 +1145,83 @@ schedule_open_edit_dialog_by_uuid (OpenEditDialogData *edit_dialog_data)
 }
 
 
+#ifdef G_OS_WIN32
+static HWND
+gcal_window_get_hwnd (GcalWindow *self)
+{
+  GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (self));
+
+  return surface ? gdk_win32_surface_get_handle (surface) : NULL;
+}
+
+static gboolean
+update_normal_geometry_cb (gpointer user_data)
+{
+  GcalWindow *self = GCAL_WINDOW (user_data);
+  HWND hwnd = gcal_window_get_hwnd (self);
+  RECT rect;
+
+  if (hwnd &&
+      !IsIconic (hwnd) &&
+      !gtk_window_is_maximized (GTK_WINDOW (self)) &&
+      !gtk_window_is_fullscreen (GTK_WINDOW (self)) &&
+      GetWindowRect (hwnd, &rect))
+    {
+      self->normal_geometry.x = rect.left;
+      self->normal_geometry.y = rect.top;
+      self->normal_geometry.width = rect.right - rect.left;
+      self->normal_geometry.height = rect.bottom - rect.top;
+      self->normal_geometry_valid = TRUE;
+    }
+
+  return G_SOURCE_CONTINUE;
+}
+
+static gboolean
+restore_normal_geometry_cb (gpointer user_data)
+{
+  GcalWindow *self = GCAL_WINDOW (user_data);
+  HWND hwnd = gcal_window_get_hwnd (self);
+
+  self->geometry_restore_id = 0;
+
+  if (hwnd &&
+      self->normal_geometry_valid &&
+      !IsIconic (hwnd) &&
+      !gtk_window_is_maximized (GTK_WINDOW (self)) &&
+      !gtk_window_is_fullscreen (GTK_WINDOW (self)))
+    {
+      SetWindowPos (hwnd, NULL,
+                    self->normal_geometry.x,
+                    self->normal_geometry.y,
+                    self->normal_geometry.width,
+                    self->normal_geometry.height,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+on_window_state_changed_cb (GObject    *object,
+                            GParamSpec *pspec,
+                            gpointer    user_data)
+{
+  GcalWindow *self = GCAL_WINDOW (object);
+
+  if (gtk_window_is_maximized (GTK_WINDOW (self)) ||
+      gtk_window_is_fullscreen (GTK_WINDOW (self)))
+    return;
+
+  if (self->normal_geometry_valid)
+    {
+      if (self->geometry_restore_id != 0)
+        g_source_remove (self->geometry_restore_id);
+      self->geometry_restore_id = g_timeout_add (50, restore_normal_geometry_cb, self);
+    }
+}
+#endif
+
 /*
  * GObject overrides
  */
@@ -1144,6 +1232,19 @@ gcal_window_finalize (GObject *object)
   GcalWindow *window = GCAL_WINDOW (object);
 
   GCAL_ENTRY;
+
+#ifdef G_OS_WIN32
+  if (window->geometry_update_id != 0)
+    {
+      g_source_remove (window->geometry_update_id);
+      window->geometry_update_id = 0;
+    }
+  if (window->geometry_restore_id != 0)
+    {
+      g_source_remove (window->geometry_restore_id);
+      window->geometry_restore_id = 0;
+    }
+#endif
 
   gcal_clear_timeout (&window->open_edit_dialog_timeout_id);
 
@@ -1239,6 +1340,12 @@ gcal_window_constructed (GObject *object)
                     "swapped-object-signal::calendar-removed", recalculate_calendar_colors_css, self,
                     NULL);
   recalculate_calendar_colors_css (self);
+
+#ifdef G_OS_WIN32
+  g_signal_connect (self, "notify::maximized", G_CALLBACK (on_window_state_changed_cb), NULL);
+  g_signal_connect (self, "notify::fullscreened", G_CALLBACK (on_window_state_changed_cb), NULL);
+  self->geometry_update_id = g_timeout_add (500, update_normal_geometry_cb, self);
+#endif
 
   GCAL_EXIT;
 }

@@ -31,6 +31,9 @@ specific so a future contributor can distinguish "it built" from "it works".
   header bar, date chooser, and view switcher are visible.
 - The app stays alive while the window is open and exits cleanly when the window
   closes. The launcher then stops the services.
+- Maximize/restore returns the window to its exact pre-maximize rectangle. This
+  was validated with the Win32 maximize/restore path; the window no longer
+  drifts to a new position.
 
 ### Evolution Data Server
 
