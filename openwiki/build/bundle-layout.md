@@ -165,6 +165,23 @@ regenerate the service files if you need activation after moving the folder.
 The bundle was tested with the MSYS2 installation temporarily renamed, which
 confirms that the app does not need `C:\msys64` at runtime.
 
+## Sharing the bundle
+
+The folder can be zipped and extracted on another Windows machine. The launcher
+computes every path from its own location, regenerates the GdkPixbuf cache, and
+starts the source registry, calendar factory, and address-book factory directly.
+The recipient does not need MSYS2 or WSL.
+
+The D-Bus service files under `share/dbus-1/services` contain absolute paths
+written at build time. They are used for optional D-Bus activation; the launcher
+starts the critical services itself, so the core calendar works after
+relocation. Rebuild the bundle at the new location if activation of the optional
+services is required.
+
+The bundle includes a `README.txt` with run instructions, the SmartScreen note,
+data locations, limitations, and source/license links. Windows may warn that the
+executable is unsigned.
+
 ## Logs
 
 The launcher writes one log per component:

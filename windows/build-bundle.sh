@@ -23,6 +23,10 @@ BUNDLE_WIN=$(cygpath -m "$BUNDLE")
 
 rm -rf "$BUNDLE"
 mkdir -p "$BUNDLE"/bin "$BUNDLE"/libexec "$BUNDLE"/lib "$BUNDLE"/share "$BUNDLE"/etc
+cp -f "$SCRIPT_DIR/bundle-README.txt" "$BUNDLE/README.txt"
+if [ -f "$SCRIPT_DIR/../COPYING" ]; then
+  cp -f "$SCRIPT_DIR/../COPYING" "$BUNDLE/COPYING"
+fi
 
 collect_dlls() {
   ldd "$1" 2>/dev/null | awk '/=> \/ucrt64\// {print $3}' | sort -u

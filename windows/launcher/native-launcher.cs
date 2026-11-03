@@ -115,6 +115,8 @@ class GnomeCalendarNativeLauncher
 
                 Process sources = StartService(
                     Path.Combine(libexec, "evolution-source-registry.exe"), "", "sources", false);
+                Process addressbook = StartService(
+                    Path.Combine(libexec, "evolution-addressbook-factory.exe"), "", "addressbook", false);
                 Process calendar = StartService(
                     Path.Combine(libexec, "evolution-calendar-factory.exe"), "", "calendar", false);
 
@@ -141,6 +143,7 @@ class GnomeCalendarNativeLauncher
                 app.WaitForExit();
 
                 TryKill(calendar);
+                TryKill(addressbook);
                 TryKill(sources);
                 TryKill(dbus);
 
@@ -194,7 +197,7 @@ class GnomeCalendarNativeLauncher
                 p.StandardError.ReadToEnd();
                 p.WaitForExit();
                 if (p.ExitCode == 0 && output.Length > 0)
-                    File.WriteAllText(cacheFile, output);
+                    File.WriteAllText(cacheFile, output.Replace("\r\n", "\n"));
             }
         }
         catch (Exception ex)

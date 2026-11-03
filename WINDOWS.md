@@ -240,6 +240,25 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass `
   -CreateDesktopShortcut
 ```
 
+## Sharing the bundle
+
+The `GNOME-Calendar-Native` folder is portable. Zip the folder and send it to
+another Windows machine. The recipient extracts it anywhere and runs
+`GNOME Calendar.exe`; no installer or WSL is required. The launcher starts the
+private D-Bus session and the EDS services, regenerates the GdkPixbuf cache for
+the new location, and stores calendar data in the recipient's own profile.
+
+The bundle contains `README.txt` with the run instructions, the SmartScreen
+note, the data locations, the known limitations, and the source/license links.
+Windows may warn that the executable is unsigned; choose "More info" and then
+"Run anyway".
+
+The D-Bus service files contain absolute paths from the build machine. The
+launcher starts the source registry, calendar factory, and address-book factory
+directly, so the core calendar works after relocation. If you need D-Bus
+activation of the optional services after moving the folder, rebuild the bundle
+at the new location with `windows/build-bundle.sh`.
+
 ## Bundle layout
 
 ```text
