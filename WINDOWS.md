@@ -53,6 +53,8 @@ GWeather location database. That is what `windows/build-bundle.sh` assembles.
   normal Windows keyboard/mouse input.
 - The app starts from a self-contained bundle; the MSYS2 installation is only
   needed to build it.
+- No console window: the app is linked as a Windows GUI subsystem executable,
+  and the launcher hides the service consoles.
 
 ## Known limitations
 

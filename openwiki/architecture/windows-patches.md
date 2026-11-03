@@ -22,6 +22,8 @@ build error appears when a patch is missing.
 | `src/gui/event-editor/gcal-attendee-summary-row.c` | Uses the BSD `uint` type. | Use `guint`. |
 | `src/gui/event-editor/gcal-schedule-section.c` | `GcalScheduleSection`'s template references `GcalDateChooserRow` and `GcalDateSelector`. The Windows static-library link can drop objects referenced only by a template, so the GTypes are not registered. | Add `g_type_ensure(GCAL_TYPE_DATE_CHOOSER_ROW)` and `g_type_ensure(GCAL_TYPE_DATE_SELECTOR)` in the class init before the template is built. |
 | `src/gui/common/*.c`, `src/gui/event-editor/*.c` | Several files include `<langinfo.h>` unconditionally. | Guard the include with `#ifndef G_OS_WIN32`. |
+| `src/meson.build` | Meson builds the executable as a console subsystem binary on Windows, which opens a terminal window. | Pass `win_subsystem: 'windows'` to the executable target so it is a GUI subsystem binary. |
+| `windows/launcher/native-launcher.cs` | The launcher starts the app with `CreateNoWindow = false`. | Set `CreateNoWindow = true`; the app is also built as a GUI subsystem binary, so the shortcut opens only the calendar window. |
 | `README.md` | The upstream README has no Windows information. | Add a Windows native build section linking to `WINDOWS.md` and the OpenWiki. |
 | `WINDOWS.md` | No user-facing Windows build/packaging guide. | Add the full guide: rationale, changes, prerequisites, scripts, bundle layout, troubleshooting, licensing. |
 | `windows/` | No reproducible Windows build assets. | Add setup/build/bundle scripts, the GeoClue stub, the UUID shim, the native launcher, the EDS patch, and a screenshot. |

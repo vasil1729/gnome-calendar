@@ -120,9 +120,11 @@ that activated instance uses the bundle's files.
 ### 6. Start the app and wait
 
 The launcher starts `bin\gnome-calendar.exe` with the same environment, captures
-its stdout/stderr into the log directory, and waits for it to exit. If the app
-exits with a non-zero code, the launcher logs the code and shows an error
-message with the log path.
+its stdout/stderr into the log directory, and waits for it to exit. The app is
+built as a Windows GUI subsystem executable (`win_subsystem: 'windows'`) and is
+started with `CreateNoWindow = true`, so the shortcut does not open a terminal
+window. If the app exits with a non-zero code, the launcher logs the code and
+shows an error message with the log path.
 
 ### 7. Clean up
 

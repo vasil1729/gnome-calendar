@@ -104,7 +104,9 @@ What the script does:
    location, which is the correct behavior on Windows without a location
    provider.
 4. Removes the previous build directory, configures the app with Meson into
-   `/ucrt64`, builds it, and installs it.
+   `/ucrt64`, builds it, and installs it. The executable uses
+   `win_subsystem: 'windows'`, so it is a GUI subsystem binary and does not
+   open a console window when launched.
 
 The app changes are small and documented in
 [Windows patch catalog](../architecture/windows-patches.md). The most important

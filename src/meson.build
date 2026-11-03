@@ -98,4 +98,5 @@ executable(
           dependencies: libgcal_dep,
                install: true,
            install_dir: calendar_bindir,
+        win_subsystem: 'windows',
 )

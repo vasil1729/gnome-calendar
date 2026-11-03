@@ -124,7 +124,7 @@ class GnomeCalendarNativeLauncher
                 app.StartInfo.FileName = Path.Combine(bin, "gnome-calendar.exe");
                 app.StartInfo.WorkingDirectory = baseDir;
                 app.StartInfo.UseShellExecute = false;
-                app.StartInfo.CreateNoWindow = false;
+                app.StartInfo.CreateNoWindow = true;
                 app.StartInfo.RedirectStandardOutput = true;
                 app.StartInfo.RedirectStandardError = true;
                 app.OutputDataReceived += delegate(object s, DataReceivedEventArgs e)
