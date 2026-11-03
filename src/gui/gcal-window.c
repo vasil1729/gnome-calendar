@@ -169,6 +169,7 @@ struct _GcalWindow
   gboolean            normal_geometry_valid;
   guint               geometry_update_id;
   guint               geometry_restore_id;
+  gboolean            drag_restore_pending;
 #endif
 
   /* File drop */
@@ -1161,6 +1162,52 @@ update_normal_geometry_cb (gpointer user_data)
   HWND hwnd = gcal_window_get_hwnd (self);
   RECT rect;
 
+  if (self->drag_restore_pending)
+    {
+      if (GetCapture () != NULL || (GetAsyncKeyState (VK_LBUTTON) & 0x8000) != 0)
+        return G_SOURCE_CONTINUE;
+
+      if (hwnd && !IsIconic (hwnd) &&
+          !gtk_window_is_maximized (GTK_WINDOW (self)) &&
+          !gtk_window_is_fullscreen (GTK_WINDOW (self)))
+        {
+          RECT current_rect;
+          POINT cursor;
+
+          if (GetWindowRect (hwnd, &current_rect) &&
+              GetCursorPos (&cursor) &&
+              !PtInRect (&current_rect, cursor))
+            {
+              gint width = current_rect.right - current_rect.left;
+              gint height = current_rect.bottom - current_rect.top;
+              gint new_x = cursor.x - width / 2;
+              gint new_y = cursor.y - 20;
+              MONITORINFO monitor_info;
+              HMONITOR monitor;
+
+              monitor = MonitorFromPoint (cursor, MONITOR_DEFAULTTONEAREST);
+              monitor_info.cbSize = sizeof (monitor_info);
+              if (GetMonitorInfo (monitor, &monitor_info))
+                {
+                  new_x = CLAMP (new_x, monitor_info.rcWork.left,
+                                 monitor_info.rcWork.right - width);
+                  new_y = CLAMP (new_y, monitor_info.rcWork.top,
+                                 monitor_info.rcWork.bottom - height);
+                }
+
+              SetWindowPos (hwnd, NULL, new_x, new_y, width, height,
+                            SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+        }
+
+      self->drag_restore_pending = FALSE;
+    }
+
+  /* Do not capture transient geometry while the user is dragging or
+   * resizing the window. */
+  if (GetCapture () != NULL || (GetAsyncKeyState (VK_LBUTTON) & 0x8000) != 0)
+    return G_SOURCE_CONTINUE;
+
   if (hwnd &&
       !IsIconic (hwnd) &&
       !gtk_window_is_maximized (GTK_WINDOW (self)) &&
@@ -1192,11 +1239,19 @@ restore_normal_geometry_cb (gpointer user_data)
       !gtk_window_is_fullscreen (GTK_WINDOW (self)))
     {
       RECT window_rect;
+      RECT current_rect;
       POINT cursor;
 
-      /* A drag-to-restore keeps the pointer captured while the user moves
-       * the restored window. Do not override the position chosen by that
-       * drag. */
+      /* If the restored window is already under the pointer, the user's
+       * drag chose that position. Leave it alone. */
+      if (GetCursorPos (&cursor) &&
+          GetWindowRect (hwnd, &current_rect) &&
+          PtInRect (&current_rect, cursor))
+        return G_SOURCE_REMOVE;
+
+      /* A drag-to-restore can still have the pointer captured while the
+       * user moves the restored window. Do not override the position
+       * chosen by that drag. */
       if (GetCapture () != NULL || (GetAsyncKeyState (VK_LBUTTON) & 0x8000) != 0)
         return G_SOURCE_REMOVE;
 
@@ -1231,6 +1286,15 @@ on_window_state_changed_cb (GObject    *object,
   if (gtk_window_is_maximized (GTK_WINDOW (self)) ||
       gtk_window_is_fullscreen (GTK_WINDOW (self)))
     return;
+
+  /* A drag-to-restore keeps the left button down and/or the pointer
+   * captured while the user moves the window. Do not schedule the saved
+   * geometry override in that case. */
+  if (GetCapture () != NULL || (GetAsyncKeyState (VK_LBUTTON) & 0x8000) != 0)
+    {
+      self->drag_restore_pending = TRUE;
+      return;
+    }
 
   if (self->normal_geometry_valid)
     {

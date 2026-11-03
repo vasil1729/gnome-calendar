@@ -42,6 +42,9 @@ specific so a future contributor can distinguish "it built" from "it works".
   far outside.
 - Drag-to-restore from the header bar was validated: the restored window
   followed the drag position and the pointer ended inside it.
+- Right-header drag was validated: dragging from `(1300,20)` to `(1000,300)`
+  restored the window centered at `(616,280)-(1384,930)`, with the pointer
+  `(1000,300)` inside it instead of the window being pushed off-screen left.
 
 ### Evolution Data Server
 
