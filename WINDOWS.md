@@ -318,5 +318,6 @@ Server fork contain the patched sources.
 - This branch: <https://github.com/vasil1729/gnome-calendar/tree/windows-native-port>
 - Evolution Data Server branch: <https://github.com/vasil1729/evolution-data-server/tree/windows-native-port>
 - OpenWiki documentation: [`openwiki/quickstart.md`](openwiki/quickstart.md)
+- Blog post: <https://vasil1729.github.io/blog/native-gnome-calendar-on-windows/>
 - Upstream GNOME Calendar: <https://gitlab.gnome.org/GNOME/gnome-calendar>
 - Upstream Evolution Data Server: <https://gitlab.gnome.org/GNOME/evolution-data-server>

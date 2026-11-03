@@ -73,6 +73,13 @@ Server sources. Weather location, GNOME Online Accounts, the desktop portal, and
 logind integration are deliberately out of scope; see
 [Known limitations](../WINDOWS.md#known-limitations).
 
+## The story
+
+A narrative version of this work, including the native-vs-WSL comparison and
+why a lightweight local-first calendar is worth the effort:
+
+<https://vasil1729.github.io/blog/native-gnome-calendar-on-windows/>
+
 ## Maintaining this wiki
 
 The pages use OpenWiki's OKF frontmatter (`type`, `title`, `description`, and
