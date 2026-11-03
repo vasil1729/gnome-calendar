@@ -1308,7 +1308,14 @@ gcal_window_constructed (GObject *object)
   /* Load saved geometry *after* the construct-time properties are set */
   settings = gcal_context_get_settings (self->context);
 
+#ifdef G_OS_WIN32
+  /* Always start windowed on Windows. Restoring a saved maximized state
+   * leaves no pre-maximize geometry to return to, which makes the window
+   * drift when the user restores it. */
+  maximized = FALSE;
+#else
   maximized = g_settings_get_boolean (settings, "window-maximized");
+#endif
   g_settings_get (settings, "window-size", "(ii)", &width, &height);
 
   gtk_window_set_default_size (GTK_WINDOW (self), width, height);
@@ -1344,7 +1351,7 @@ gcal_window_constructed (GObject *object)
 #ifdef G_OS_WIN32
   g_signal_connect (self, "notify::maximized", G_CALLBACK (on_window_state_changed_cb), NULL);
   g_signal_connect (self, "notify::fullscreened", G_CALLBACK (on_window_state_changed_cb), NULL);
-  self->geometry_update_id = g_timeout_add (500, update_normal_geometry_cb, self);
+  self->geometry_update_id = g_timeout_add (100, update_normal_geometry_cb, self);
 #endif
 
   GCAL_EXIT;
@@ -1445,7 +1452,11 @@ gcal_window_unmap (GtkWidget *widget)
 
   gtk_window_get_default_size (GTK_WINDOW (self), &width, &height);
 
+#ifdef G_OS_WIN32
+  g_settings_set_boolean (settings, "window-maximized", FALSE);
+#else
   g_settings_set_boolean (settings, "window-maximized", gtk_window_is_maximized (GTK_WINDOW (self)));
+#endif
   g_settings_set (settings, "window-size", "(ii)", width, height);
 
   GTK_WIDGET_CLASS (gcal_window_parent_class)->unmap (widget);

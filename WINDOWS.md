@@ -106,7 +106,9 @@ The branch contains small, targeted Windows fixes:
 - `src/gui/gcal-window.c`: remember the normal window rectangle while the window
   is unmaximized and restore it after unmaximizing. GTK's Win32 backend
   otherwise lets the window creep to a new position on maximize/restore. The
-  restore is skipped for minimized windows.
+  restore is skipped for minimized windows, and the Windows build always starts
+  windowed because a saved maximized state leaves no pre-maximize geometry to
+  restore.
 - `src/gui/common/*.c`, `src/gui/event-editor/*.c`: guard the remaining
   `langinfo.h` includes.
 

@@ -34,6 +34,9 @@ specific so a future contributor can distinguish "it built" from "it works".
 - Maximize/restore returns the window to its exact pre-maximize rectangle. This
   was validated with the Win32 maximize/restore path; the window no longer
   drifts to a new position.
+- With `window-maximized=true` saved in GSettings, the app still opened
+  windowed, then maximize/restore returned to the exact pre-maximize
+  rectangle.
 
 ### Evolution Data Server
 
