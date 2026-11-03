@@ -1191,12 +1191,25 @@ restore_normal_geometry_cb (gpointer user_data)
       !gtk_window_is_maximized (GTK_WINDOW (self)) &&
       !gtk_window_is_fullscreen (GTK_WINDOW (self)))
     {
+      RECT window_rect;
+      POINT cursor;
+
       SetWindowPos (hwnd, NULL,
                     self->normal_geometry.x,
                     self->normal_geometry.y,
                     self->normal_geometry.width,
                     self->normal_geometry.height,
                     SWP_NOZORDER | SWP_NOACTIVATE);
+
+      /* If the pointer was left at the old restore button, bring it back
+       * over the restored window instead of leaving it far away. */
+      window_rect.left = self->normal_geometry.x;
+      window_rect.top = self->normal_geometry.y;
+      window_rect.right = self->normal_geometry.x + self->normal_geometry.width;
+      window_rect.bottom = self->normal_geometry.y + self->normal_geometry.height;
+
+      if (GetCursorPos (&cursor) && !PtInRect (&window_rect, cursor))
+        SetCursorPos (window_rect.right - 88, window_rect.top + 40);
     }
 
   return G_SOURCE_REMOVE;

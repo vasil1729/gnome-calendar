@@ -108,7 +108,8 @@ The branch contains small, targeted Windows fixes:
   otherwise lets the window creep to a new position on maximize/restore. The
   restore is skipped for minimized windows, and the Windows build always starts
   windowed because a saved maximized state leaves no pre-maximize geometry to
-  restore.
+  restore. If the pointer would be left outside the restored window, it is moved
+  back over the restored window's header bar.
 - `src/gui/common/*.c`, `src/gui/event-editor/*.c`: guard the remaining
   `langinfo.h` includes.
 

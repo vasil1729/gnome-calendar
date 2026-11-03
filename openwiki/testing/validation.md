@@ -37,6 +37,9 @@ specific so a future contributor can distinguish "it built" from "it works".
 - With `window-maximized=true` saved in GSettings, the app still opened
   windowed, then maximize/restore returned to the exact pre-maximize
   rectangle.
+- The pointer was placed at the maximized window's restore button; after
+  restore it was moved back inside the restored window instead of being left
+  far outside.
 
 ### Evolution Data Server
 
