@@ -111,9 +111,11 @@ The branch contains small, targeted Windows fixes:
   restore. If the pointer would be left outside the restored window, it is moved
   back over the restored window's header bar. Drag-to-restore is left to
   GTK/Windows: when the mouse is captured or the left button is held, the
-  geometry override is skipped so the window follows the drag. If the drag ends
-  with the pointer outside the restored window (for example when grabbing the
-  right side of the header), the window is centered on the pointer.
+  geometry override is skipped so the window follows the drag. If the pointer
+  is outside the restored window when the drag begins (for example when
+  grabbing the right side of the header), the window is centered on the pointer
+  immediately, while the drag is still active, so it follows the drag directly
+  instead of jumping after release.
 - `src/gui/common/*.c`, `src/gui/event-editor/*.c`: guard the remaining
   `langinfo.h` includes.
 

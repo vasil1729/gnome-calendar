@@ -45,6 +45,10 @@ specific so a future contributor can distinguish "it built" from "it works".
 - Right-header drag was validated: dragging from `(1300,20)` to `(1000,300)`
   restored the window centered at `(616,280)-(1384,930)`, with the pointer
   `(1000,300)` inside it instead of the window being pushed off-screen left.
+- Left-header drag sampling confirmed direct tracking: the window followed the
+  pointer at every sample (for example `(150,190)-(918,840)` with pointer
+  `(350,210)` mid-drag), and ended at `(300,380)-(1068,1030)` with pointer
+  `(500,400)` after release. There was no late left-then-right jump.
 
 ### Evolution Data Server
 
