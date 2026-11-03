@@ -242,6 +242,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass `
 
 ## Sharing the bundle
 
+A prebuilt zip is published at
+<https://github.com/vasil1729/gnome-calendar/releases/tag/windows-native-2026-11-03>.
+
 The `GNOME-Calendar-Native` folder is portable. Zip the folder and send it to
 another Windows machine. The recipient extracts it anywhere and runs
 `GNOME Calendar.exe`; no installer or WSL is required. The launcher starts the

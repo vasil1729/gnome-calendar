@@ -23,6 +23,7 @@ not use WSL.
 - OpenWiki architecture and build documentation: [openwiki/quickstart.md](openwiki/quickstart.md)
 - Windows branch: <https://github.com/vasil1729/gnome-calendar/tree/windows-native-port>
 - Evolution Data Server branch: <https://github.com/vasil1729/evolution-data-server/tree/windows-native-port>
+- Prebuilt Windows zip: <https://github.com/vasil1729/gnome-calendar/releases/tag/windows-native-2026-11-03>
 - Blog post: <https://vasil1729.github.io/blog/native-gnome-calendar-on-windows/>
 
 Quick start from an MSYS2 UCRT64 shell:
